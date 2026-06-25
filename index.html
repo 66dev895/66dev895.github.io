@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>梁雨婷 · 作品集</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family: 'Segoe UI','PingFang SC',sans-serif; background:#0d1117; color:#c9d1d9; line-height:1.6; }
+.container { max-width:960px; margin:0 auto; padding:40px 24px; }
+.header { text-align:center; padding:60px 0 40px; }
+.header h1 { font-size:2.5rem; color:#58a6ff; }
+.header p { color:#8b949e; margin-top:8px; font-size:1.1rem; }
+.header .links { margin-top:16px; display:flex; gap:16px; justify-content:center; flex-wrap:wrap; }
+.header .links a { color:#58a6ff; text-decoration:none; padding:6px 16px; border:1px solid #30363d; border-radius:20px; font-size:0.9rem; }
+.header .links a:hover { background:#1f6feb22; }
+.project { background:#161b22; border:1px solid #21262d; border-radius:12px; padding:32px; margin-bottom:24px; }
+.project h2 { color:#58a6ff; font-size:1.3rem; margin-bottom:4px; }
+.project .subtitle { color:#8b949e; font-size:0.85rem; margin-bottom:16px; }
+.project .desc { margin-bottom:16px; }
+.project .tags { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:16px; }
+.project .tags span { background:#1f6feb22; color:#58a6ff; border:1px solid #1f6feb44; padding:3px 12px; border-radius:20px; font-size:0.8rem; }
+.project .links { display:flex; gap:12px; flex-wrap:wrap; }
+.project .links a { color:#c9d1d9; text-decoration:none; padding:8px 20px; border-radius:8px; font-size:0.9rem; display:inline-flex; align-items:center; gap:6px; }
+.btn-source { background:#238636; }
+.btn-demo { background:#1f6feb; }
+.btn-arch { background:#30363d; }
+.footer { text-align:center; padding:40px 0; color:#484f58; font-size:0.85rem; }
+.diagram { background:#0d1117; border:1px solid #21262d; border-radius:8px; padding:24px; margin:16px 0; overflow-x:auto; font-family:'Courier New',monospace; font-size:0.8rem; white-space:pre; line-height:1.4; }
+.diagram .hl { color:#58a6ff; }
+.diagram .hl2 { color:#3fb950; }
+.diagram .hl3 { color:#d2991d; }
+@media (max-width:640px) { .header h1 { font-size:1.8rem; } .project { padding:20px; } }
+</style>
+</head>
+<body>
+<div class="container">
+<div class="header">
+  <h1>👩‍💻 梁雨婷</h1>
+  <p>太原理工大学 · 软件工程 · 2024 级</p>
+  <p style="color:#8b949e;font-size:0.9rem;">后端开发 / AI 研发 / AI 产品 · 实习生</p>
+  <div class="links">
+    <a href="https://github.com/66dev895">📂 GitHub</a>
+    <a href="mailto:2516521417@qq.com">📧 2516521417@qq.com</a>
+    <a href="tel:17891216894">📞 17891216894</a>
+  </div>
+</div>
+
+<!-- Project 1: C++ HTTP Server -->
+<div class="project">
+  <h2>⚡ C++ 轻量级 HTTP 服务器</h2>
+  <div class="subtitle">后端开发 · 系统编程 · 2025.06</div>
+  <div class="desc">从零构建基于 epoll + 线程池的高性能 HTTP/1.1 服务器，支持 URL 路由、静态文件服务、JSON API，零外部依赖。严格遵循 OOP 设计原则。</div>
+  <div class="tags">
+    <span>C++17</span><span>epoll</span><span>Thread Pool</span><span>OOP</span><span>CMake</span><span>Linux</span><span>Socket</span>
+  </div>
+  <div class="links">
+    <a class="btn-source" href="https://github.com/66dev895/cpp-http-server">📂 源代码</a>
+    <a class="btn-arch" href="#cpp-arch">📐 架构图</a>
+  </div>
+  <div id="cpp-arch" class="diagram">
+┌──────────────────────────────────────────────────────┐
+│                    <span class="hl">HttpServer</span> (Facade)                    │
+│  SetupSocket() → EventLoop() → Stop()                 │
+│  epoll ET + EPOLLONESHOT                              │
+└──────┬───────────────────────────────┬───────────────┘
+       │ accept                        │ read event
+       ▼                               ▼
+┌──────────────┐              ┌────────────────────────┐
+│  <span class="hl2">listen_fd</span>    │              │   <span class="hl3">ThreadPool</span>            │
+│  socket()    │              │   Worker × N           │
+│  bind()      │              │   Submit(F, args...)   │
+│  listen()    │              │   → std::future&lt;R&gt;    │
+└──────────────┘              └───────────┬────────────┘
+                                          │ task
+                              ┌───────────┼───────────┐
+                              ▼           ▼           ▼
+                    ┌──────────────┐ ┌──────────┐ ┌──────────────┐
+                    │ <span class="hl">HttpParser</span> │ │ <span class="hl">Router</span>  │ │ <span class="hl">HttpResponse</span> │
+                    │ 状态机        │ │ regex匹配 │ │ Builder模式   │
+                    │ 增量解析      │ │ GET/POST  │ │ SetStatus()   │
+                    │ Reset()复用   │ │ Dispatch  │ │ SetBody()     │
+                    └──────────────┘ └──────────┘ └──────┬───────┘
+                                                        │
+                                              ┌─────────▼─────────┐
+                                              │  send() → socket  │
+                                              │  HTTP/1.1 响应    │
+                                              └───────────────────┘
+  </div>
+</div>
+
+<!-- Project 2: algo-viz -->
+<div class="project">
+  <h2>🎨 算法可视化 AI 平台</h2>
+  <div class="subtitle">全栈开发 · AI 集成 · 2025.03 – 2025.04</div>
+  <div class="desc">面向教学的算法可视化平台，集成 AI 实现智能讲解。5 人团队协作，46 个测试用例全部通过，GitHub Actions 自动部署。</div>
+  <div class="tags">
+    <span>TypeScript</span><span>React</span><span>Vite</span><span>Canvas API</span><span>LLM API</span><span>Vitest</span><span>GitHub Actions</span>
+  </div>
+  <div class="links">
+    <a class="btn-source" href="https://github.com/66dev895/algo-viz">📂 源代码</a>
+    <a class="btn-demo" href="https://66dev895.github.io/algo-viz/">🌐 在线演示</a>
+  </div>
+  <div class="diagram">
+┌─────────────────────────────────────────────────────────┐
+│                    用户浏览器                              │
+│  ┌──────────┐  ┌──────────┐  ┌────────────────────┐     │
+│  │算法选择器│  │参数输入框│  │可视化渲染区(Canvas) │     │
+│  │ 下拉菜单  │  │ 文本输入  │  │ 条形图/棋盘/汉诺塔  │     │
+│  └──────────┘  └──────────┘  └────────────────────┘     │
+└──────────────────────┬──────────────────────────────────┘
+                       │
+┌──────────────────────▼──────────────────────────────────┐
+│              <span class="hl">Step List 架构</span> (核心设计)                   │
+│                                                          │
+│  ┌──────────┐    ┌──────────────┐    ┌──────────────┐   │
+│  │ Algorithm │───▶│ Step[] 生成   │───▶│ Player 播放  │   │
+│  │ 算法模块   │    │ 完整步骤列表  │    │ 暂停/播放/步进│   │
+│  │ bubbleSort│    │ [s1,s2,...sn] │    │ 速度调节      │   │
+│  │ quickSort │    └──────────────┘    └──────────────┘   │
+│  │ nQueens   │                                           │
+│  │ hanoiTower│    ┌──────────────┐    ┌──────────────┐   │
+│  └──────────┘    │ Visual Renderer│◀───│ LLM 讲解      │   │
+│                  │ Bar/Board/Tower│    │ 智能问答      │   │
+│                  └──────────────┘    └──────────────┘   │
+└──────────────────────────────────────────────────────────┘
+  </div>
+</div>
+
+<!-- Project 3: RAG QA System -->
+<div class="project">
+  <h2>📄 RAG 智能文档问答系统</h2>
+  <div class="subtitle">AI 研发 · 全栈 · 2025.06</div>
+  <div class="desc">基于 RAG 架构的文档问答系统。上传 PDF/TXT 后即可用自然语言提问，AI 基于文档内容精准回答，支持流式 SSE 对话。</div>
+  <div class="tags">
+    <span>Python FastAPI</span><span>ChromaDB</span><span>RAG</span><span>React</span><span>SSE</span><span>sentence-transformers</span><span>LLM</span>
+  </div>
+  <div class="links">
+    <a class="btn-source" href="https://github.com/66dev895/rag-qa-system">📂 源代码</a>
+    <a class="btn-arch" href="#rag-arch">📐 架构图</a>
+  </div>
+  <div id="rag-arch" class="diagram">
+                           ┌─────────────┐
+                           │  用户上传文档 │
+                           │ PDF/TXT/MD  │
+                           └──────┬──────┘
+                                  ▼
+┌─────────────────────────────────────────────────────────┐
+│                   <span class="hl">RAG Pipeline</span> (离线索引)                │
+│                                                          │
+│  ┌────────────┐   ┌────────────┐   ┌────────────────┐   │
+│  │<span class="hl2">DocumentLoader</span>│──▶│<span class="hl2">TextSplitter</span> │──▶│<span class="hl2">EmbeddingService</span>│   │
+│  │ PDF → 文本  │   │递归字符分割 │   │sentence-       │   │
+│  │ 提取元数据  │   │500字/块     │   │transformers    │   │
+│  └────────────┘   │overlap=100  │   │→ 384维向量     │   │
+│                   └────────────┘   └───────┬────────┘   │
+│                                            │             │
+│                   ┌────────────────────────▼──────────┐  │
+│                   │    <span class="hl3">VectorStore</span> (ChromaDB)        │  │
+│                   │    持久化存储 · 余弦相似度检索      │  │
+│                   └───────────────────────────────────┘  │
+└─────────────────────────────────────────────────────────┘
+                                  │
+┌─────────────────────────────────▼───────────────────────┐
+│                  <span class="hl">RAG Pipeline</span> (在线问答)                │
+│                                                          │
+│  ┌──────────┐    ┌──────────┐    ┌──────────────────┐   │
+│  │ 用户提问  │───▶│Retriever │───▶│ Generator (LLM)  │   │
+│  └──────────┘    │检索Top-K │    │ 流式 SSE 响应     │   │
+│                  │片段+格式化│    │ 基于文档回答      │   │
+│                  └──────────┘    └──────────────────┘   │
+└─────────────────────────────────────────────────────────┘
+  </div>
+</div>
+
+<!-- Project 4: AI Resume Matcher -->
+<div class="project">
+  <h2>🎯 AI 简历优化 & 岗位匹配平台</h2>
+  <div class="subtitle">AI 产品 · 全栈 · 2025.06</div>
+  <div class="desc">上传简历即可获得 AI 评分与优化建议；对标岗位 JD，输出匹配度分析与技能差距报告。LLM Structured JSON Output 驱动。</div>
+  <div class="tags">
+    <span>Next.js 15</span><span>TypeScript</span><span>OpenAI API</span><span>Structured Output</span><span>React 19</span><span>Vercel</span>
+  </div>
+  <div class="links">
+    <a class="btn-source" href="https://github.com/66dev895/ai-resume-matcher">📂 源代码</a>
+    <a class="btn-arch" href="#resume-arch">📐 架构图</a>
+  </div>
+  <div id="resume-arch" class="diagram">
+┌──────────────────────────────────────────────────────────┐
+│                  用户浏览器 (Next.js SSR)                  │
+│                                                          │
+│  ┌────────────────────┐    ┌────────────────────────┐    │
+│  │   简历输入区         │    │   岗位 JD 输入区       │    │
+│  │   上传 .txt/.md     │    │   粘贴或手输           │    │
+│  │   或直接粘贴         │    │                        │    │
+│  └────────┬───────────┘    └───────────┬────────────┘    │
+│           │                            │                  │
+│  ┌────────▼────────────────────────────▼────────────┐    │
+│  │              [智能分析]  [岗位匹配]                │    │
+│  └────────┬────────────────────────────┬────────────┘    │
+└───────────┼────────────────────────────┼─────────────────┘
+            │ POST /api/analyze          │ POST /api/match
+            ▼                            ▼
+┌──────────────────────────────────────────────────────────┐
+│              <span class="hl">Next.js API Routes</span> (服务端)                │
+│                                                          │
+│  ┌─────────────────────┐  ┌─────────────────────────┐    │
+│  │ /api/analyze         │  │ /api/match               │    │
+│  │ System Prompt:       │  │ System Prompt:           │    │
+│  │ "你是资深 HR..."     │  │ "你是技术面试官..."      │    │
+│  │ → {score, strengths, │  │ → {score, matched[],     │    │
+│  │    weaknesses,        │  │    missing[], analysis}  │    │
+│  │    suggestions,       │  │                          │    │
+│  │    keywords}          │  │                          │    │
+│  └──────────┬──────────┘  └───────────┬───────────────┘    │
+│             │                         │                     │
+│  ┌──────────▼─────────────────────────▼───────────────┐    │
+│  │           <span class="hl2">OpenAI 兼容 API</span>                          │    │
+│  │  response_format: { type: "json_object" }          │    │
+│  │  支持 GPT / DeepSeek / 通义千问                      │    │
+│  └────────────────────────────────────────────────────┘    │
+└──────────────────────────────────────────────────────────┘
+  </div>
+</div>
+
+<div class="footer">
+  <p>© 2025 梁雨婷 · Built with ❤️ · 所有项目开源在 <a href="https://github.com/66dev895" style="color:#58a6ff;">github.com/66dev895</a></p>
+</div>
+</div>
+
+<!-- 微小的页面截图模拟 — 当 iframe 不可用时展示静态预览 -->
+</body>
+</html>
